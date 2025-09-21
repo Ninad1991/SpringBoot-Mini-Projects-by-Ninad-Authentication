@@ -5,7 +5,9 @@ import org.example.userauthservice_begmay2025.exceptions.UserAlreadySignedInExce
 import org.example.userauthservice_begmay2025.exceptions.UserNotFoundInSystemException;
 import org.example.userauthservice_begmay2025.models.User;
 import org.example.userauthservice_begmay2025.repos.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -13,11 +15,15 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
+    @Autowired
     private UserRepo userRepo;
 
-    public AuthService(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+//    public AuthService(UserRepo userRepo) {
+//        this.userRepo = userRepo;
+//    }
 
     public User signup(String email, String password) {
         Optional<User> userOptional = userRepo.findByEmailEquals(email);
@@ -28,7 +34,8 @@ public class AuthService {
 
         User user = new User();
         user.setEmail(email);
-        user.setPassword(password);
+        //user.setPassword(password);
+        user.setPassword(bCryptPasswordEncoder.encode(password));
         userRepo.save(user);
 
         return user;
@@ -44,10 +51,19 @@ public class AuthService {
 
         String pwd = userOptional.get().getPassword();
 
-        if (!password.equals(pwd)) {
+
+   //     if (!password.equals(pwd)) {
+        if (!bCryptPasswordEncoder.matches(password, pwd)) {
             throw new
                     PasswordMismatchException("You have entered incorrect password, please use correct password or reset it");
         }
+
+
+        // token generation
+
+
+
+
         return userOptional.get();
     }
 

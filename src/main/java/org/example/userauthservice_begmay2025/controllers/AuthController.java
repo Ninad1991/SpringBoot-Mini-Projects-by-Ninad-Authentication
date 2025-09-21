@@ -5,6 +5,7 @@ import org.example.userauthservice_begmay2025.dtos.SignupRequestDto;
 import org.example.userauthservice_begmay2025.dtos.UserDto;
 import org.example.userauthservice_begmay2025.models.User;
 import org.example.userauthservice_begmay2025.services.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -12,11 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
+    @Autowired
     private AuthService authService;
 
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+//    public AuthController(AuthService authService) {
+//        this.authService = authService;
+//    }
 
 
     @PostMapping("/signup")
