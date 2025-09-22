@@ -1,11 +1,16 @@
 package org.example.userauthservice_begmay2025.controllers;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.example.userauthservice_begmay2025.dtos.LoginRequestDTO;
 import org.example.userauthservice_begmay2025.dtos.SignupRequestDto;
 import org.example.userauthservice_begmay2025.dtos.UserDto;
 import org.example.userauthservice_begmay2025.models.User;
 import org.example.userauthservice_begmay2025.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -35,11 +40,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public UserDto login (@RequestBody LoginRequestDTO loginRequestDTO){
+    public ResponseEntity<UserDto>  login (@RequestBody LoginRequestDTO loginRequestDTO){
         try{
-            User user =
+            Pair<User,String> userTokenPair =
                     authService.login(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
-        return from(user);
+            UserDto userDto = from(userTokenPair.a);
+
+            MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+            headers.add("Authorization", "Bearer " + userTokenPair.b);
+
+        return new ResponseEntity<>(userDto, headers, HttpStatusCode.valueOf(201));
         }
         catch (Exception exception){
             throw exception;
