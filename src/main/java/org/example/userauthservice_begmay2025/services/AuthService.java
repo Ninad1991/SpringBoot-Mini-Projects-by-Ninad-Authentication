@@ -1,5 +1,7 @@
 package org.example.userauthservice_begmay2025.services;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.MacAlgorithm;
 import org.antlr.v4.runtime.misc.Pair;
@@ -7,19 +9,13 @@ import org.example.userauthservice_begmay2025.exceptions.PasswordMismatchExcepti
 import org.example.userauthservice_begmay2025.exceptions.UserAlreadySignedInException;
 import org.example.userauthservice_begmay2025.exceptions.UserNotFoundInSystemException;
 import org.example.userauthservice_begmay2025.models.User;
+import org.example.userauthservice_begmay2025.models.UserSession;
 import org.example.userauthservice_begmay2025.repos.UserRepo;
+import org.example.userauthservice_begmay2025.repos.UserSessionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,11 +23,18 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
+
     @Autowired
     private UserRepo userRepo;
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private UserSessionRepo userSessionRepo;
+
+    @Autowired
+    private SecretKey secretKey;
 
 //    public AuthService(UserRepo userRepo) {
 //        this.userRepo = userRepo;
@@ -88,26 +91,51 @@ public class AuthService {
         claims.put("user_id", userOptional.get().getId());
         Long nowInMillis = System.currentTimeMillis();
         claims.put("iat",nowInMillis); //issued at
-        claims.put("exp",nowInMillis +10000);
+        claims.put("exp",nowInMillis + 10000000);
         claims.put("iss","scaler_uas");
 
-        MacAlgorithm algorithm = Jwts.SIG.HS256;
-        SecretKey secretKey = algorithm.key().build();
+//        MacAlgorithm algorithm = Jwts.SIG.HS256;
+//        SecretKey secretKey = algorithm.key().build();
 
         String token = Jwts.builder().claims(claims).signWith(secretKey).compact();
 
-        return new Pair<User,String>(userOptional.get(),token);
+        // persisting the geneerated token
 
-//        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-//        headers.add("Authorization", "Bearer " + token);
-//
-//        ResponseEntity<User> userResponseEntity = new ResponseEntity<>(userOptional.get(),
-//                headers,
-//                HttpStatusCode.valueOf(201));
-//
-//            return userResponseEntity;
-        //        return userOptional.get();
+        UserSession userSession = new UserSession();
+        userSession.setUser(userOptional.get());
+        userSession.setToken(token);
+
+        userSessionRepo.save(userSession);
+
+        return new Pair<User,String>(userOptional.get(),token);
     }
+
+    public Boolean validateToken(String token, Long userId) {
+        Optional<UserSession> optionalUserSession = userSessionRepo.findByTokenAndUserId(token,userId);
+
+        if(optionalUserSession.isEmpty()){
+            return false;
+        }
+
+        UserSession userSession = optionalUserSession.get();
+        String persistedToken = userSession.getToken();
+
+        //parsing token to get payload to get expiry
+
+        JwtParser jwtParser = Jwts.parser().verifyWith(secretKey).build();
+
+        Claims claims = jwtParser.parseSignedClaims(token).getPayload();
+
+        Long expiry = (Long) claims.get("exp");
+        Long currentTime = System.currentTimeMillis();
+
+        if(currentTime > expiry){
+            System.out.println("Token has expired");
+            return false;
+        }
+        return true;
+    }
+
 
 
 }
