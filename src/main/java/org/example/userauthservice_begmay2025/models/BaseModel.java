@@ -1,11 +1,11 @@
 package org.example.userauthservice_begmay2025.models;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.util.Date;
 
@@ -18,12 +18,15 @@ public abstract class  BaseModel {
     @Id
     private Long id;
 
+    @CreatedDate
     private Date createdAt;
 
+    @LastModifiedDate
     private Date lastUpdatedAt;
 
 //    private String createdBy;
 
+    @Enumerated(EnumType.STRING)
     private State state;
 
 }

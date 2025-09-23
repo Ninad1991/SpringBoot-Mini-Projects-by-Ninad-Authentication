@@ -15,6 +15,7 @@ import org.example.userauthservice_begmay2025.repos.UserSessionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import javax.crypto.SecretKey;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class AuthService {
         Optional<User> userOptional = userRepo.findByEmailEquals(email);
 
         if (userOptional.isPresent()) {
-            throw new UserAlreadySignedInException("user already exists, please login using email: "+email);
+            throw new UserAlreadySignedInException("user already exists, please login using email: " + email);
         }
 
         User user = new User();
@@ -67,7 +68,7 @@ public class AuthService {
         String pwd = userOptional.get().getPassword();
 
 
-   //     if (!password.equals(pwd)) {
+        //     if (!password.equals(pwd)) {
         if (!bCryptPasswordEncoder.matches(password, pwd)) {
             throw new
                     PasswordMismatchException("You have entered incorrect password, please use correct password or reset it");
@@ -85,17 +86,18 @@ public class AuthService {
 //                " \"expirationDate\": \"22Sep2025\"\n" +
 //                "}";
 
-  //      byte[] content = message.getBytes(StandardCharsets.UTF_8);
+        //      byte[] content = message.getBytes(StandardCharsets.UTF_8);
 
-        Map<String,Object> claims = new HashMap<>();
+        Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", userOptional.get().getId());
         Long nowInMillis = System.currentTimeMillis();
-        claims.put("iat",nowInMillis); //issued at
-        claims.put("exp",nowInMillis + 10000000);
-        claims.put("iss","scaler_uas");
+        claims.put("iat", nowInMillis); //issued at
+        claims.put("exp", nowInMillis + 10000000);
+        claims.put("iss", "scaler_uas");
 
 //        MacAlgorithm algorithm = Jwts.SIG.HS256;
 //        SecretKey secretKey = algorithm.key().build();
+
 
         String token = Jwts.builder().claims(claims).signWith(secretKey).compact();
 
@@ -107,13 +109,13 @@ public class AuthService {
 
         userSessionRepo.save(userSession);
 
-        return new Pair<User,String>(userOptional.get(),token);
+        return new Pair<User, String>(userOptional.get(), token);
     }
 
     public Boolean validateToken(String token, Long userId) {
-        Optional<UserSession> optionalUserSession = userSessionRepo.findByTokenAndUserId(token,userId);
+        Optional<UserSession> optionalUserSession = userSessionRepo.findByTokenAndUserId(token, userId);
 
-        if(optionalUserSession.isEmpty()){
+        if (optionalUserSession.isEmpty()) {
             return false;
         }
 
@@ -129,13 +131,12 @@ public class AuthService {
         Long expiry = (Long) claims.get("exp");
         Long currentTime = System.currentTimeMillis();
 
-        if(currentTime > expiry){
+        if (currentTime > expiry) {
             System.out.println("Token has expired");
             return false;
         }
         return true;
     }
-
 
 
 }

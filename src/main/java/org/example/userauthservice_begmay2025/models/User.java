@@ -3,8 +3,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Date;
 
 
 @Setter
@@ -19,5 +22,10 @@ public class User extends BaseModel {
 
     private String password;
 
+    public User() {
+        this.setState(State.ACTIVE);
+        this.setCreatedAt(new Date());
+        this.setLastUpdatedAt(new Date());
+    }
 
 }

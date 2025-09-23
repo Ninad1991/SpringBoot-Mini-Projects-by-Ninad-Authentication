@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -50,7 +51,7 @@ public class AuthController {
         try{
             Pair<User,String> userTokenPair =
                     authService.login(loginRequestDTO.getEmail(), loginRequestDTO.getPassword());
-            UserDto userDto = from(userTokenPair.a);
+            UserDto userDto = UserMapperUtil.from(userTokenPair.a);
 
             MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
             headers.add(HttpHeaders.SET_COOKIE, userTokenPair.b);
@@ -77,11 +78,5 @@ public class AuthController {
 
     }
 
-    private UserDto from (User user){
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setEmail(user.getEmail());
-        return userDto;
-    }
 
 }
