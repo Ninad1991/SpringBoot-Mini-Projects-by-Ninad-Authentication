@@ -92,8 +92,8 @@ public class AuthService {
         claims.put("user_id", userOptional.get().getId());
         Long nowInMillis = System.currentTimeMillis();
         claims.put("iat", nowInMillis); //issued at
-        claims.put("exp", nowInMillis + 10000000);
-        claims.put("iss", "scaler_uas");
+        claims.put("exp", nowInMillis + 10000000); // expiry of session
+        claims.put("iss", "scaler_uas"); //
 
 //        MacAlgorithm algorithm = Jwts.SIG.HS256;
 //        SecretKey secretKey = algorithm.key().build();

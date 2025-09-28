@@ -6,6 +6,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
+
 @Entity
 @Setter
 @Getter
@@ -16,6 +18,13 @@ public class UserSession extends BaseModel {
     private User user;
 
     private String token;
+
+
+    public UserSession() {
+        this.setState(State.ACTIVE);
+        this.setCreatedAt(new Date());
+        this.setLastUpdatedAt(new Date());
+    }
 
 
 
