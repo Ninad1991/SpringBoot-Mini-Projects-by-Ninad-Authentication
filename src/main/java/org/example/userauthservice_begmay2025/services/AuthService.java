@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -53,7 +54,6 @@ public class AuthService {
         //user.setPassword(password);
         user.setPassword(bCryptPasswordEncoder.encode(password));
         userRepo.save(user);
-
         return user;
 
     }
@@ -106,6 +106,9 @@ public class AuthService {
         UserSession userSession = new UserSession();
         userSession.setUser(userOptional.get());
         userSession.setToken(token);
+        Long expMillis = (Long)claims.get("exp");
+        Date exp = new Date(expMillis);
+        userSession.setExpires(exp);
 
         userSessionRepo.save(userSession);
 

@@ -1,5 +1,6 @@
 package org.example.userauthservice_begmay2025.controllers;
 
+import jakarta.validation.Valid;
 import org.antlr.v4.runtime.misc.Pair;
 import org.example.userauthservice_begmay2025.dtos.LoginRequestDTO;
 import org.example.userauthservice_begmay2025.dtos.SignupRequestDto;
@@ -35,7 +36,7 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public UserDto signup(@RequestBody SignupRequestDto signupRequestDto){
+    public UserDto signup(@Valid @RequestBody SignupRequestDto signupRequestDto){
         try{
             User user =
                     authService.signup(signupRequestDto.getEmail(), signupRequestDto.getPassword());
@@ -43,7 +44,6 @@ public class AuthController {
         }catch (Exception exception){
             throw exception;
         }
-
     }
 
     @PostMapping("/login")

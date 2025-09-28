@@ -5,6 +5,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -18,6 +19,9 @@ public class UserSession extends BaseModel {
     private User user;
 
     private String token;
+
+    @DateTimeFormat
+    private Date expires;
 
 
     public UserSession() {
